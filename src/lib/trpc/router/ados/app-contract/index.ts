@@ -10,7 +10,7 @@ export const appContractRouter = createTRPCRouter({
     .input(z.object({}))
     .query<APP_CONTRACT.GetComponentsResponse>(async ({ ctx, input }) => {
       const components = await queryAppGetComponents(
-        await ctx.getRpcClient(input["chain-identifier"]),
+        await ctx.getRpcClient(ctx.chainConfig),
         ctx.resolvedContractAddress,
       );
       return components;
@@ -21,7 +21,7 @@ export const appContractRouter = createTRPCRouter({
     .query<APP_CONTRACT.GetAddressesWithNamesResponse>(
       async ({ ctx, input }) => {
         const addresses = await queryAppGetAddressesWithNames(
-          await ctx.getRpcClient(input["chain-identifier"]),
+          await ctx.getRpcClient(ctx.chainConfig),
           ctx.resolvedContractAddress,
         );
         return addresses;

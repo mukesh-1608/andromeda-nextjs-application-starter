@@ -26,7 +26,7 @@ export async function queryVfsUsername(
     getFreshValue: async () => {
       const username = await client.queryContractSmart<VFS.GetUsernameResponse>(
         vfsAddress,
-        VFS.getUsernameMsg(address),
+        VFS.getUsernameMsg({ address }),
       );
       return username;
     },
@@ -46,7 +46,7 @@ export async function queryVfsResolvePath(
       const resolvedPath =
         await client.queryContractSmart<VFS.ResolvePathResponse>(
           vfsAddress,
-          VFS.resolvePathMsg(path),
+          VFS.resolvePathMsg({ path }),
         );
       return resolvedPath;
     },
@@ -59,9 +59,6 @@ export async function queryVfsResolvePathUsingPathOnly(
   defaultConfig: IChainConfig,
   getRpcClient?: (chainIdentifier: string) => Promise<RpcClient>,
 ) {
-  // Strip the path to a raw vfs path (no protocols etc)
-  const rawPath = VFS.stripPath(path);
-
   // If the path is an IBC path, extract the chain name and use it to query the chain config
   // i.e. if the path looks like "ibc://chainId/..." we want to use "chainId" as the chain name
   const chainIdentifier = VFS.getChainIdentifierFromPath(path);
@@ -78,6 +75,9 @@ export async function queryVfsResolvePathUsingPathOnly(
       `Chain config not found for identifier: ${chainIdentifier}`,
     );
   }
+
+  // Strip the path to a raw vfs path (no protocols etc)
+  const rawPath = VFS.stripPath(path);
 
   // If the path is a valid bech32 address, return it early to prevent unnecessary queries
   if (isValidBech32Address(rawPath)) {

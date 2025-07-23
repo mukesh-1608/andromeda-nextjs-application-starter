@@ -10,8 +10,9 @@ import Image from "next/image";
 interface Props {}
 
 const LandingPage: React.FC<Props> = (props) => {
-  const { connectedChain } = useAndromedaStore();
-  const { data, isLoading } = useChainConfig(connectedChain || "");
+  const { data, isLoading } = useChainConfig(
+    process.env.NEXT_PUBLIC_CHAIN_IDENTIFIER || "",
+  );
   return (
     <GridBackground>
       <div className="flex flex-col min-h-screen items-center justify-center gap-4">
