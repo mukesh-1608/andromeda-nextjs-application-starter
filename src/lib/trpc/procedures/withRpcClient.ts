@@ -1,3 +1,4 @@
+import { IChainConfig } from "../router/chain/types";
 import { t } from "../trpc";
 import { RpcClient } from "@/lib/andrjs/rpc-client/client";
 
@@ -10,12 +11,15 @@ const cachedRpcClients: {
  * Adds a required chainId to the input and adds the chain config to the context.
  */
 export const withRpcClient = t.procedure.use(async ({ ctx, next }) => {
-  const getRpcClient = async (chainIdentifier: string) => {
-    const chainConfig = ctx.chainList.find(
-      (c) => c.chainId === chainIdentifier || c.name === chainIdentifier,
-    );
-    if (!chainConfig) {
-      throw new Error(`Chain config not found for ${chainIdentifier}`);
+  const getRpcClient = async (chainConfig: string | IChainConfig) => {
+    if (typeof chainConfig === "string") {
+      const _chainConfig = ctx.chainList.find(
+        (c) => c.chainId === chainConfig || c.name === chainConfig,
+      );
+      if (!_chainConfig) {
+        throw new Error(`Chain config not found for ${chainConfig}`);
+      }
+      chainConfig = _chainConfig;
     }
     // Cache rpc client and try to reuse it
     let rpcClientPromise = cachedRpcClients[chainConfig.chainUrl];

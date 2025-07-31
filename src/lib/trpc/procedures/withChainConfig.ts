@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { t } from "../trpc";
 import { RpcClient } from "@/lib/andrjs/rpc-client/client";
 import { withRpcClient } from "./withRpcClient";
 
