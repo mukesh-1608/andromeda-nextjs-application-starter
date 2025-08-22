@@ -6,8 +6,8 @@ import { GasPrice } from "@cosmjs/stargate";
 
 const MARKETPLACE_CONTRACT_ADDRESS = 'andr1a243c32szfdgq07e0a7vdukj8h065txvrzsy4kp8k9973604f9jspxmy3y';
 const CW721_CONTRACT_ADDRESS = 'andr1m3dq2q20x239d3ccxvdeumasay09dexj5c5w26dwa7yypqgx4djsr0yecx';
-const REST_ENDPOINT = 'https://andromeda-testnet-rpc.publicnode.com';
-const RPC_ENDPOINT = 'https://andromeda-testnet-rpc.publicnode.com'; // NOTE: We use the same endpoint for RPC and REST
+const RPC_ENDPOINT = 'https://andromeda-galileo-rpc.andromeda.zone';
+const REST_ENDPOINT = 'https://andromeda-galileo-api.andromeda.zone';
 const GAS_PRICE = GasPrice.fromString("0.1uandr");
 
 interface SaleInfo {
@@ -32,7 +32,7 @@ const MarketplacePage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Query for the sale info on the marketplace
+                // 1. Query for the sale info on the marketplace
                 const salesQuery = { sales: { nft_contract_address: CW721_CONTRACT_ADDRESS, token_id: "Cow01" } };
                 const salesQueryBase64 = btoa(JSON.stringify(salesQuery));
                 const salesUrl = `${REST_ENDPOINT}/cosmwasm/wasm/v1/contract/${MARKETPLACE_CONTRACT_ADDRESS}/smart/${salesQueryBase64}`;
@@ -45,7 +45,7 @@ const MarketplacePage = () => {
                     return;
                 }
                 
-                // Query for the NFT's metadata from the CW721 contract
+                // 2. Query for the NFT's metadata from the CW721 contract
                 const nftInfoQuery = { nft_info: { token_id: "Cow01" } };
                 const nftInfoQueryBase64 = btoa(JSON.stringify(nftInfoQuery));
                 const nftInfoUrl = `${REST_ENDPOINT}/cosmwasm/wasm/v1/contract/${CW721_CONTRACT_ADDRESS}/smart/${nftInfoQueryBase64}`;
@@ -53,7 +53,7 @@ const MarketplacePage = () => {
                 const nftInfoData = await nftInfoResponse.json();
                 const tokenUri = nftInfoData.data.token_uri;
 
-                // Fetch the actual metadata from the IPFS gateway
+                // 3. Fetch the actual metadata from the IPFS gateway
                 const metadataResponse = await fetch(tokenUri);
                 const metadata = await metadataResponse.json();
 
