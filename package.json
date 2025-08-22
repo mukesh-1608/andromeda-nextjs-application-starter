@@ -14,9 +14,9 @@
   "dependencies": {
     "@andromedaprotocol/andromeda.js": "^2.0.0",
     "@cosmjs/amino": "^0.32.4",
-    "@cosmjs/cosmwasm-stargate": "^0.32.3",
+    "@cosmjs/cosmwasm-stargate": "^0.32.4",
     "@cosmjs/proto-signing": "^0.32.3",
-    "@cosmjs/stargate": "^0.32.3",
+    "@cosmjs/stargate": "^0.32.4",
     "@epic-web/cachified": "^5.5.1",
     "@radix-ui/react-popover": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",

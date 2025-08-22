@@ -1,15 +1,14 @@
 'use client'
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-// NOTE: These lines are removed to avoid the errors. 
-// Instead, the code will handle client creation internally.
-// import { useAndromedaClient } from '@andromeda-client/react';
-// import { CW721, Marketplace } from '@andromeda-client/andromeda-contracts';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasPrice } from "@cosmjs/stargate";
 
 const MARKETPLACE_CONTRACT_ADDRESS = 'andr1a243c32szfdgq07e0a7vdukj8h065txvrzsy4kp8k9973604f9jspxmy3y';
 const CW721_CONTRACT_ADDRESS = 'andr1m3dq2q20x239d3ccxvdeumasay09dexj5c5w26dwa7yypqgx4djsr0yecx';
-const REST_ENDPOINT = 'https://andromeda-testnet-api.polkachu.com';
+const REST_ENDPOINT = 'https://andromeda-testnet-rpc.publicnode.com';
+const RPC_ENDPOINT = 'https://andromeda-testnet-rpc.publicnode.com'; // NOTE: We use the same endpoint for RPC and REST
+const GAS_PRICE = GasPrice.fromString("0.1uandr");
 
 interface SaleInfo {
     sale_id: string;
@@ -33,7 +32,7 @@ const MarketplacePage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 1. Query for the sale info on the marketplace
+                // Query for the sale info on the marketplace
                 const salesQuery = { sales: { nft_contract_address: CW721_CONTRACT_ADDRESS, token_id: "Cow01" } };
                 const salesQueryBase64 = btoa(JSON.stringify(salesQuery));
                 const salesUrl = `${REST_ENDPOINT}/cosmwasm/wasm/v1/contract/${MARKETPLACE_CONTRACT_ADDRESS}/smart/${salesQueryBase64}`;
@@ -46,7 +45,7 @@ const MarketplacePage = () => {
                     return;
                 }
                 
-                // 2. Query for the NFT's metadata from the CW721 contract
+                // Query for the NFT's metadata from the CW721 contract
                 const nftInfoQuery = { nft_info: { token_id: "Cow01" } };
                 const nftInfoQueryBase64 = btoa(JSON.stringify(nftInfoQuery));
                 const nftInfoUrl = `${REST_ENDPOINT}/cosmwasm/wasm/v1/contract/${CW721_CONTRACT_ADDRESS}/smart/${nftInfoQueryBase64}`;
@@ -54,7 +53,7 @@ const MarketplacePage = () => {
                 const nftInfoData = await nftInfoResponse.json();
                 const tokenUri = nftInfoData.data.token_uri;
 
-                // 3. Fetch the actual metadata from the IPFS gateway
+                // Fetch the actual metadata from the IPFS gateway
                 const metadataResponse = await fetch(tokenUri);
                 const metadata = await metadataResponse.json();
 
@@ -77,20 +76,38 @@ const MarketplacePage = () => {
             return;
         }
 
-        const buyMsg = {
-            buy: {
-                nft_contract_address: CW721_CONTRACT_ADDRESS,
-                token_id: "Cow01"
-            }
-        };
-
-        const funds = [{ amount: saleInfo.sale_type.fixed_price.price.amount, denom: saleInfo.sale_type.fixed_price.price.denom }];
-
         try {
-            // NOTE: This part requires an installed Andromeda client library.
-            // Since `npm install` is failing, you will need to add this back once the package is available.
-            // For the demo, this code block shows the intended functionality.
-            alert("A wallet transaction would be initiated here. Due to package issues, please demonstrate this step manually via CLI.");
+            // Request to connect to the wallet
+            const chainId = "andromeda-testnet-1"; 
+            await (window as any).keplr.enable(chainId);
+            const offlineSigner = await (window as any).keplr.getOfflineSigner(chainId);
+            const accounts = await offlineSigner.getAccounts();
+            
+            // Create a client to sign and send transactions
+            const client = await SigningCosmWasmClient.connectWithSigner(
+                RPC_ENDPOINT,
+                offlineSigner,
+                { gasPrice: GAS_PRICE }
+            );
+
+            const buyMsg = {
+                buy: {
+                    nft_contract_address: CW721_CONTRACT_ADDRESS,
+                    token_id: "Cow01"
+                }
+            };
+
+            const funds = [{ amount: saleInfo.sale_type.fixed_price.price.amount, denom: saleInfo.sale_type.fixed_price.price.denom }];
+
+            const response = await client.execute(
+                accounts[0].address,
+                MARKETPLACE_CONTRACT_ADDRESS,
+                buyMsg,
+                "auto",
+                "",
+                funds
+            );
+            alert('Purchase successful! Transaction hash: ' + response.transactionHash);
         } catch (error) {
             console.error("Buy failed:", error);
             alert('Buy failed. See console for details.');

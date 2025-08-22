@@ -14,12 +14,6 @@ export enum KeplrConnectionStatus {
   Connecting,
 }
 
-/**
- * Andromeda store is used for client connection in app.
- * This takes away most of the complexity related to connecting chain and keplr with your app so you can
- * directly start with building your app
- */
-
 export interface IAndromedaStore {
   client?: ChainClient;
   connectedChain?: string;
@@ -71,18 +65,14 @@ export const connectAndromedaClient = async (chainIdentifier: string) => {
     if (!keplr) throw new Error("Keplr not instantiated yet");
 
     keplr.defaultOptions = {
-      // Use these fields to change keplr way of showing fee and memo. If you need your set fee to be
-      // Enabled by default, change value to true. Same for memo however user won't have option to override memo but
-      // they can override fee
       sign: {
-        // If there is gas fee error for a chain, do a conditional check here
         preferNoSetFee: true,
-        // preferNoSetMemo: false
       },
     };
     try {
       await keplr.enable(config.chainId);
     } catch (err) {
+      console.warn("Failed to enable chain, suggesting it to Keplr...", err);
       const keplrConfig =
         await trpcStandaloneClient.chainConfig.keplrConfig.query({
           chainId: config.chainId,
@@ -114,6 +104,7 @@ export const connectAndromedaClient = async (chainIdentifier: string) => {
       client: client,
     });
   } catch (err) {
+    console.error("Failed to connect Andromeda client:", err);
     useAndromedaStore.setState({ isLoading: false, autoconnect: false });
     throw err;
   } finally {
@@ -134,10 +125,6 @@ const keplrKeystoreChange = async () => {
   }
 };
 
-/**
- * https://docs.keplr.app/api/
- * Taken from above
- */
 export function initiateKeplr() {
   if (window.keplr) {
     useAndromedaStore.setState({
