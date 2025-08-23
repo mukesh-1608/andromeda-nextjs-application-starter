@@ -24,6 +24,20 @@ const Connected: FC<ConnectedProps> = (props) => {
   const address = account?.address ?? "";
   const truncatedAddress =
     address.slice(0, 6) + "......" + address.slice(address.length - 4);
+
+  // Don't render anything until the config and account data are loaded
+  if (!config || !account) {
+    return (
+      <Button
+        className={`border border-gray-300 outline-none text backdrop-blur-2xl`}
+        variant="outline"
+        disabled
+      >
+        Loading...
+      </Button>
+    );
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -32,13 +46,16 @@ const Connected: FC<ConnectedProps> = (props) => {
           variant="outline"
         >
           <div className="flex items-center">
-            <Image
-              src={config?.iconUrls?.sm ?? ""}
-              className="w-5"
-              alt="icon"
-              width={100}
-              height={100}
-            />
+            {/* Conditionally render the Image only when the src is valid */}
+            {config?.iconUrls?.sm && (
+              <Image
+                src={config.iconUrls.sm}
+                className="w-5"
+                alt="icon"
+                width={20}
+                height={20}
+              />
+            )}
             <span className="text-md ml-2">{truncatedAddress}</span>
             <Badge
               className={`ml-2 text-white uppercase ${config?.chainType === "mainnet" ? "bg-green-500" : "bg-purple-500"}`}
@@ -58,8 +75,8 @@ const Connected: FC<ConnectedProps> = (props) => {
               src={config.iconUrls.sm}
               className="w-5"
               alt="icon"
-              width={100}
-              height={100}
+              width={20}
+              height={20}
             />
           )}
           <span className="font-semibold flex-1 ml-2">
@@ -102,6 +119,7 @@ const Connected: FC<ConnectedProps> = (props) => {
                 account?.address ?? "",
               )}
               target="_blank"
+              rel="noopener noreferrer"
             >
               <ExternalLinkIcon className="w-4 h-4" />
               Explorer

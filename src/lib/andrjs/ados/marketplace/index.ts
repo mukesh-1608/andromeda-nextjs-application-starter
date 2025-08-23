@@ -1,4 +1,4 @@
-import { MarketplaceContractTsQueryMsgBuilder } from "./MarketplaceContractTs.message-builder";
+import { MarketplaceContractTsExecuteMsgBuilder, MarketplaceContractTsQueryMsgBuilder } from "./MarketplaceContractTs.message-builder";
 import {
   SaleStateResponse,
   Status,
@@ -31,4 +31,7 @@ export namespace MARKETPLACE {
     MarketplaceContractTsQueryMsgBuilder.authorizedAddresses;
 
   export type AuthorizedAddressesResponseType = AuthorizedAddressesResponse;
+
+  // This line was added to fix the error
+  export const buyMsg = MarketplaceContractTsExecuteMsgBuilder.buy;
 }
