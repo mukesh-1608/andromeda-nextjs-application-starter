@@ -1,14 +1,23 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 import { useAndromedaStore, connectAndromedaClient } from '@/zustand/andromeda';
-import { Coin } from '@cosjs/proto-signing';
+import { Coin } from '@cosmjs/proto-signing';
 import { CopyButton } from '@/components/ui/copy-button';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { trpcReactClient } from '@/lib/trpc/client';
 
+// Define a type for the TokenCard props to fix all TypeScript errors
+interface TokenCardProps {
+    saleContractAddress: string;
+    tokenSymbol: string;
+    tokenName: string;
+    description: string;
+    imageUrl: string;
+}
+
 // This is a new component for displaying each token
-const TokenCard = ({ saleContractAddress, tokenSymbol, tokenName, description, imageUrl }) => {
+const TokenCard: FC<TokenCardProps> = ({ saleContractAddress, tokenSymbol, tokenName, description, imageUrl }) => {
     const { client: andromedaClient, isConnected, connectedChain } = useAndromedaStore();
     const [quantity, setQuantity] = useState(1);
     const [totalCost, setTotalCost] = useState(0);
@@ -20,9 +29,9 @@ const TokenCard = ({ saleContractAddress, tokenSymbol, tokenName, description, i
         "contract-address": saleContractAddress,
     }, { enabled: !!connectedChain && !!saleContractAddress });
 
-    // Safely access tier price, assuming tier[0] exists
-    const pricePerToken = campaignInfo?.tiers?.[0]?.price ? parseInt(campaignInfo.tiers[0].price, 10) : 0;
-    const availableSupply = campaignInfo ? parseInt(campaignInfo.available_tokens, 10) / (10**6) : 0; // Assuming 6 decimals
+    // Safely access tier price and available tokens. Casting to `any` bypasses incorrect type definitions in the starter kit.
+    const pricePerToken = (campaignInfo as any)?.tiers?.[0]?.tier?.price ? parseInt((campaignInfo as any).tiers[0].tier.price, 10) : 0;
+    const availableSupply = (campaignInfo as any)?.available_tokens ? parseInt((campaignInfo as any).available_tokens, 10) / (10**6) : 0; // Assuming 6 decimals
 
     useEffect(() => {
         const amount = Number(quantity) || 0;
@@ -188,7 +197,7 @@ const TokenMarketplacePage = () => {
                 {tokensToDisplay.map(token => (
                     <TokenCard 
                         key={token.symbol} 
-                        saleContractAddress={token.saleContractAddress}
+                        saleContractAddress={token.saleContractAddress || ''}
                         tokenSymbol={token.symbol}
                         tokenName={token.name}
                         description={token.description}

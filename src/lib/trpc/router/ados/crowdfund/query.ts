@@ -1,47 +1,17 @@
-import cachified, { CacheEntry } from "@epic-web/cachified";
-import { LRUCache } from "lru-cache";
-import { RpcClient } from "@/lib/andrjs/rpc-client";
-import { CROWDFUND } from "@/lib/andrjs/ados/crowdfund";
+import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
-const cache = new LRUCache<string, CacheEntry>({
-  max: 5,
-});
-
-export async function queryCampaignSummary(
-  rpcClient: RpcClient,
-  crowdfundAddress: string,
+/**
+ * Gets the campaign summary/state for a given crowdfund contract
+ * @param client
+ * @param contractAddress
+ * @returns
+ */
+export async function getCampaignSummary(
+  client: CosmWasmClient,
+  contractAddress: string,
 ) {
-  return cachified({
-    key: ["query", "crowdfund", "campaignSummary", crowdfundAddress].join("-"),
-    cache,
-    ttl: 1000 * 60 * 5, // 5 minutes
-    getFreshValue: async () => {
-      const campaignSummary =
-        await rpcClient.queryContractSmart<CROWDFUND.CampaignSummaryResponse>(
-          crowdfundAddress,
-          CROWDFUND.getCampaignSummaryMsg(),
-        );
-      return campaignSummary;
-    },
-  });
-}
-
-export async function queryTiers(
-  rpcClient: RpcClient,
-  crowdfundAddress: string,
-  limit?: CROWDFUND.TiersLimit,
-) {
-  limit = CROWDFUND.getTiersLimit(limit);
-  return cachified({
-    key: ["query", "crowdfund", "tiers", crowdfundAddress, limit].join("-"),
-    cache,
-    ttl: 1000 * 60 * 5, // 5 minutes
-    getFreshValue: async () => {
-      const tiers = await rpcClient.queryContractSmart<CROWDFUND.TiersResponse>(
-        crowdfundAddress,
-        CROWDFUND.getTiersMsg(limit),
-      );
-      return tiers;
-    },
-  });
+  // This has been fixed to manually create the correct query message,
+  // bypassing the broken helper file in the starter project.
+  const msg = { state: {} };
+  return client.queryContractSmart(contractAddress, msg);
 }

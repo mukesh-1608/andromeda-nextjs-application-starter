@@ -10,9 +10,10 @@ export default function Home() {
             <p className="text-xl text-gray-400 mb-8">
                 The Future of Fractional Livestock Ownership
             </p>
-            <Link href="/marketplace">
+            {/* This link now correctly points to your new token marketplace */}
+            <Link href="/tokens">
                 <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors duration-200">
-                    View Marketplace
+                    View Token Marketplace
                 </button>
             </Link>
         </div>
