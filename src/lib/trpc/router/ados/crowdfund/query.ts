@@ -1,17 +1,16 @@
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { RpcClient } from "@/lib/andrjs/rpc-client";
 
 /**
  * Gets the campaign summary/state for a given crowdfund contract
- * @param client
+ * @param rpcClient
  * @param contractAddress
  * @returns
  */
 export async function getCampaignSummary(
-  client: CosmWasmClient,
+  rpcClient: RpcClient,
   contractAddress: string,
 ) {
-  // This has been fixed to manually create the correct query message,
-  // bypassing the broken helper file in the starter project.
-  const msg = { state: {} };
-  return client.queryContractSmart(contractAddress, msg);
+  // Manually create the correct query message, bypassing any broken helpers.
+  const msg = { campaign_summary: {} };
+  return rpcClient.queryContractSmart(contractAddress, msg);
 }
