@@ -10,7 +10,7 @@ export async function getCampaignSummary(
   rpcClient: RpcClient,
   contractAddress: string,
 ) {
-  // Manually create the correct query message, bypassing any broken helpers.
+  // This is the correct query message for the crowdfund contract.
   const msg = { campaign_summary: {} };
   return rpcClient.queryContractSmart(contractAddress, msg);
 }
