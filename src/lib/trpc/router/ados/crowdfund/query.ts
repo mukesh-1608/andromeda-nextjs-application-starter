@@ -1,4 +1,5 @@
 import { RpcClient } from "@/lib/andrjs/rpc-client";
+import { CROWDFUND } from "@/lib/andrjs/ados/crowdfund";
 
 /**
  * Gets the campaign summary/state for a given crowdfund contract
@@ -10,7 +11,6 @@ export async function getCampaignSummary(
   rpcClient: RpcClient,
   contractAddress: string,
 ) {
-  // This is the correct query message for the crowdfund contract.
-  const msg = { campaign_summary: {} };
+  const msg = CROWDFUND.getCampaignSummaryMsg();
   return rpcClient.queryContractSmart(contractAddress, msg);
 }
